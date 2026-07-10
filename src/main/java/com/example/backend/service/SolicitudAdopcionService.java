@@ -67,18 +67,19 @@ public class SolicitudAdopcionService {
     SolicitudAdopcion solicitud = solicitudRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
-    // 2. EXTRAER ID DE MASCOTA Y BUSCARLA DE NUEVO
-    // Esto evita problemas de "entidad desconectada" o carga perezosa (Lazy)
+    // 2. Asegurar que tenemos la mascota
     Integer mascotaId = solicitud.getMascota().getId();
     Mascota mascota = mascotaRepository.findById(mascotaId)
             .orElseThrow(() -> new RuntimeException("Mascota no encontrada"));
 
-    // 3. Actualizar estados
-    solicitud.setEstadoSolicitud(SolicitudAdopcion.EstadoSolicitud.RECHAZADA);
+    // 3. CAMBIO CRÍTICO: Usamos DENEGADA (lo que espera tu DB)
+    solicitud.setEstadoSolicitud(SolicitudAdopcion.EstadoSolicitud.DENEGADA);
     solicitud.setObservaciones(observaciones);
+    
+    // 4. Devolver la mascota a estado DISPONIBLE
     mascota.setEstado(Mascota.EstadoMascota.DISPONIBLE);
 
-    // 4. Guardar en orden lógico
+    // 5. Guardar
     mascotaRepository.save(mascota);
     return solicitudRepository.save(solicitud);
 }
