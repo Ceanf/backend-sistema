@@ -63,18 +63,27 @@ public class SolicitudAdopcionService {
     }
 
     public SolicitudAdopcion rechazar(Integer id, String observaciones) {
-        SolicitudAdopcion solicitud = solicitudRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+    // 1. Buscamos la solicitud
+    SolicitudAdopcion solicitud = solicitudRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
-        solicitud.setEstadoSolicitud(SolicitudAdopcion.EstadoSolicitud.RECHAZADA);
-        solicitud.setObservaciones(observaciones);
-
-        Mascota mascota = solicitud.getMascota();
-        mascota.setEstado(Mascota.EstadoMascota.DISPONIBLE);
-        mascotaRepository.save(mascota);
-
-        return solicitudRepository.save(solicitud);
+    // 2. CAMBIO CRÍTICO: Aseguramos que tenemos la referencia a la mascota
+    Mascota mascota = solicitud.getMascota();
+    if (mascota == null) {
+        throw new RuntimeException("Error: La solicitud no tiene una mascota asociada");
     }
+
+    // 3. Actualizamos estados
+    solicitud.setEstadoSolicitud(SolicitudAdopcion.EstadoSolicitud.RECHAZADA);
+    solicitud.setObservaciones(observaciones);
+
+    // 4. Cambiamos el estado de la mascota
+    mascota.setEstado(Mascota.EstadoMascota.DISPONIBLE);
+    
+    // 5. Guardamos en orden: primero mascota, luego solicitud
+    mascotaRepository.save(mascota);
+    return solicitudRepository.save(solicitud);
+}
 
     @Transactional(readOnly = true)
     public List<SolicitudAdopcion> listarTodas() { return solicitudRepository.findAll(); }
