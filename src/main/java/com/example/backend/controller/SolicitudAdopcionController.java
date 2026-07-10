@@ -54,10 +54,12 @@ public class SolicitudAdopcionController {
             Mascota mascota = mascotaRepository.findById(solicitud.getMascota().getId())
                     .orElseThrow(() -> new RuntimeException("Mascota no encontrada con ID: " + solicitud.getMascota().getId()));
 
-            // 3. Asignación forzada de campos críticos para evitar errores de restricción
+            // 3. Asignación forzada de campos críticos
             solicitud.setUsuario(usuario);
             solicitud.setMascota(mascota);
-            solicitud.setEstadoSolicitud(SolicitudAdopcion.EstadoSolicitud.PENDIENTE);
+            
+            // IMPORTANTE: Sincronizado con el valor real de tu BD (ENVIADA)
+            solicitud.setEstadoSolicitud(SolicitudAdopcion.EstadoSolicitud.ENVIADA);
             
             if (solicitud.getFechaSolicitud() == null) {
                 solicitud.setFechaSolicitud(LocalDateTime.now());
