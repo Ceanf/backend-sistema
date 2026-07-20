@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import com.example.backend.BackendApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -10,6 +11,12 @@ import java.util.Arrays;
 
 @Configuration
 public class CorsConfig {
+
+    private final BackendApplication backendApplication;
+
+    CorsConfig(BackendApplication backendApplication) {
+        this.backendApplication = backendApplication;
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -23,7 +30,8 @@ public class CorsConfig {
                 "http://localhost:4200",
                 "http://127.0.0.1:5173",
                 "http://127.0.0.1:3000",
-                "https://sistema-web-adopcionhd.vercel.app" 
+                "https://sistema-web-adopcionhd-alpha.vercel.app"
+
         )); // Aquí cierras el paréntesis de asList y el punto y coma final
 
         // ─── Métodos HTTP permitidos ────────────────────────
