@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 @Data
 @NoArgsConstructor
@@ -49,30 +53,28 @@ public class Mascota {
     @Column(name = "foto", length = 500)
     private String foto;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "fecha_ingreso", nullable = false, updatable = false)
     private LocalDate fechaIngreso = LocalDate.now();
 
+    // ESTE ES EL ÚNICO CAMPO PARA LA FECHA DE CREACIÓN
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "fecha_creacion")
+    private LocalDateTime fechaCreacion;
+
+    // ─── Evento del Ciclo de Vida JPA ─────────────────
+    @PrePersist
+    public void prePersist() {
+        if (this.fechaCreacion == null) {
+            this.fechaCreacion = LocalDateTime.now();
+            System.out.println("DEBUG: Asignando fecha de creación: " + this.fechaCreacion);
+        }
+    }
+
     // ─── Enums ─────────────────────────────────────────
-    public enum Especie {
-        PERRO,
-        GATO,
-        OTRO
-    }
-
-    public enum Tamanio {
-        PEQUENIO,
-        MEDIANO,
-        GRANDE
-    }
-
-    public enum Sexo {
-        MACHO,
-        HEMBRA
-    }
-
-    public enum EstadoMascota {
-        DISPONIBLE,
-        EN_PROCESO,
-        ADOPTADO
-    }
+    public enum Especie { PERRO, GATO, OTRO }
+    public enum Tamanio { PEQUENIO, MEDIANO, GRANDE }
+    public enum Sexo { MACHO, HEMBRA }
+    public enum EstadoMascota { DISPONIBLE, EN_PROCESO, ADOPTADO, SUSPENDIDO }
 }

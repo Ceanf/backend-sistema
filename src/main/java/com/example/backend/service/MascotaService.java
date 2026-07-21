@@ -5,6 +5,7 @@ import com.example.backend.repository.MascotaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays; // Importante para crear la lista de estados
 import java.util.List;
 import java.util.Optional;
@@ -24,10 +25,15 @@ public class MascotaService {
         ));
     }
 
-    // ─── Registrar nueva mascota ───────────────────────────
     public Mascota registrar(Mascota mascota) {
-        return mascotaRepository.save(mascota);
+    // ESTA ES LA LÍNEA QUE TE FALTA:
+    if (mascota.getFechaCreacion() == null) {
+        mascota.setFechaCreacion(LocalDateTime.now());
     }
+    
+    return mascotaRepository.save(mascota);
+
+}
 
     // ─── Listar todas las mascotas ─────────────────────────
     public List<Mascota> listarTodas() {
@@ -44,24 +50,29 @@ public class MascotaService {
         return mascotaRepository.findByEspecie(especie);
     }
 
-    // ─── Actualizar mascota ────────────────────────────────
-    public Mascota actualizar(Integer id, Mascota mascotaActualizada) {
-        Mascota mascotaExistente = mascotaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mascota no encontrada con ID: " + id));
+   // ─── Actualizar mascota (Versión Profesional) ────────────────────────────────
+public Mascota actualizar(Integer id, Mascota mascotaActualizada) {
+    // 1. Buscamos la mascota existente
+    Mascota mascotaExistente = mascotaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Mascota no encontrada con ID: " + id));
 
-        mascotaExistente.setNombre(mascotaActualizada.getNombre());
-        mascotaExistente.setEspecie(mascotaActualizada.getEspecie());
-        mascotaExistente.setRaza(mascotaActualizada.getRaza());
-        mascotaExistente.setEdad(mascotaActualizada.getEdad());
-        mascotaExistente.setTamanio(mascotaActualizada.getTamanio());
-        mascotaExistente.setSexo(mascotaActualizada.getSexo());
-        mascotaExistente.setEstado(mascotaActualizada.getEstado());
-        mascotaExistente.setDescripcion(mascotaActualizada.getDescripcion());
-        mascotaExistente.setFoto(mascotaActualizada.getFoto());
+    // 2. Mapeo de datos (Validamos que no vengan nulos para mantener la integridad)
+    if (mascotaActualizada.getNombre() != null) mascotaExistente.setNombre(mascotaActualizada.getNombre());
+    if (mascotaActualizada.getEspecie() != null) mascotaExistente.setEspecie(mascotaActualizada.getEspecie());
+    if (mascotaActualizada.getRaza() != null) mascotaExistente.setRaza(mascotaActualizada.getRaza());
+    if (mascotaActualizada.getEdad() != null) mascotaExistente.setEdad(mascotaActualizada.getEdad());
+    if (mascotaActualizada.getTamanio() != null) mascotaExistente.setTamanio(mascotaActualizada.getTamanio());
+    if (mascotaActualizada.getSexo() != null) mascotaExistente.setSexo(mascotaActualizada.getSexo());
+    
+    // Aquí es donde manejamos tu lógica de los 4 estados: DISPONIBLE, ADOPTADO, EN_PROCESO, SUSPENDIDO
+    if (mascotaActualizada.getEstado() != null) mascotaExistente.setEstado(mascotaActualizada.getEstado());
+    
+    if (mascotaActualizada.getDescripcion() != null) mascotaExistente.setDescripcion(mascotaActualizada.getDescripcion());
+    if (mascotaActualizada.getFoto() != null) mascotaExistente.setFoto(mascotaActualizada.getFoto());
 
-        return mascotaRepository.save(mascotaExistente);
-    }
-
+    // 3. Guardamos y retornamos
+    return mascotaRepository.save(mascotaExistente);
+}
     // ─── Cambiar estado de mascota ─────────────────────────
     public Mascota cambiarEstado(Integer id, Mascota.EstadoMascota nuevoEstado) {
         Mascota mascota = mascotaRepository.findById(id)
