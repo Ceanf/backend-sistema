@@ -24,4 +24,8 @@ public interface MascotaRepository extends JpaRepository<Mascota, Integer> {
 
     // Buscar mascotas por especie y estado
     List<Mascota> findByEspecieAndEstado(Mascota.Especie especie, EstadoMascota estado);
+
+    // Contar mascotas por estado
+    long countByEstado(Mascota.EstadoMascota estado);
+
 }

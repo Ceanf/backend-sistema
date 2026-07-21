@@ -32,4 +32,8 @@ public interface SolicitudAdopcionRepository extends JpaRepository<SolicitudAdop
             @Param("mascotaId") Integer mascotaId, 
             @Param("estado") SolicitudAdopcion.EstadoSolicitud estado
     );
+
+    // Contar solicitudes por estado
+long countByEstadoSolicitud(
+        SolicitudAdopcion.EstadoSolicitud estadoSolicitud);
 }
