@@ -38,6 +38,13 @@ public class SolicitudAdopcion {
     @Column(name = "observaciones", columnDefinition = "TEXT")
     private String observaciones;
 
+    // Nuevos campos añadidos y mapeados explícitamente para el formulario detallado
+    @Column(name = "tiene_mascotas", columnDefinition = "TEXT")
+    private String tieneMascotas;
+
+    @Column(name = "ocupacion", length = 150)
+    private String ocupacion;
+
     // Cambiado a EAGER para evitar LazyInitializationException en el controlador
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)

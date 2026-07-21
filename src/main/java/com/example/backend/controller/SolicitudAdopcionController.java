@@ -17,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/solicitudes-adopcion")
+@CrossOrigin(origins = "*") // Permite la comunicación limpia con tu frontend en React
 public class SolicitudAdopcionController {
 
     @Autowired private SolicitudAdopcionService solicitudService;
@@ -55,7 +56,7 @@ public class SolicitudAdopcionController {
                         .body("Ya tienes una solicitud enviada para esta mascota. Espera a que sea revisada.");
             }
 
-            // 2. Buscar entidades
+            // 2. Buscar entidades completas en base de datos
             Usuario usuario = usuarioRepository.findById(solicitud.getUsuario().getId())
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
             Mascota mascota = mascotaRepository.findById(solicitud.getMascota().getId())
@@ -65,6 +66,9 @@ public class SolicitudAdopcionController {
             solicitud.setMascota(mascota);
             solicitud.setEstadoSolicitud(SolicitudAdopcion.EstadoSolicitud.ENVIADA);
             solicitud.setFechaSolicitud(LocalDateTime.now());
+
+            // Los nuevos campos (tipoVivienda, espacioAdecuado, motivo, tieneMascotas, ocupacion) 
+            // ya viajan mapeados automáticamente en el objeto JSON gracias a @RequestBody y Lombok.
 
             return ResponseEntity.status(HttpStatus.CREATED).body(solicitudService.registrar(solicitud));
 
@@ -80,28 +84,27 @@ public class SolicitudAdopcionController {
 
     @PutMapping("/{id}/aprobar")
     public ResponseEntity<SolicitudAdopcion> aprobar(@PathVariable Integer id) {
-        try { return ResponseEntity.ok(solicitudService.aprobar(id)); }
-        catch (RuntimeException e) { return ResponseEntity.notFound().build(); }
+        try { 
+            return ResponseEntity.ok(solicitudService.aprobar(id)); 
+        } catch (RuntimeException e) { 
+            return ResponseEntity.notFound().build(); 
+        }
     }
 
     @PutMapping("/{id}/rechazar")
-public ResponseEntity<?> rechazar(@PathVariable Integer id, @RequestParam(required = false) String observaciones) {
-    try {
-        String obs = (observaciones != null) ? observaciones : "Sin observaciones";
-        return ResponseEntity.ok(solicitudService.rechazar(id, obs));
-    } catch (Exception e) {
-        // ESTO ES LO QUE NECESITAMOS:
-        // En lugar de devolver un error 500 oculto, devolveremos el mensaje de la excepción.
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                             .body("FALLA REAL: " + e.getMessage());
+    public ResponseEntity<?> rechazar(@PathVariable Integer id, @RequestParam(required = false) String observaciones) {
+        try {
+            String obs = (observaciones != null) ? observaciones : "Sin observaciones";
+            return ResponseEntity.ok(solicitudService.rechazar(id, obs));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("FALLA REAL: " + e.getMessage());
+        }
     }
-}
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         solicitudService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-
-    
 }

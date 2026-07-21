@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,8 +42,9 @@ public class Mascota {
     @Column(name = "sexo", nullable = false)
     private Sexo sexo;
 
+    // 🛠️ ADAPTACIÓN: Mapeo seguro para columna VARCHAR en base de datos manteniendo el Enum
     @Enumerated(EnumType.STRING)
-    @Column(name = "estado", nullable = false)
+    @Column(name = "estado", nullable = false, columnDefinition = "VARCHAR(50)")
     private EstadoMascota estado = EstadoMascota.DISPONIBLE;
 
     @Column(name = "descripcion", columnDefinition = "TEXT")

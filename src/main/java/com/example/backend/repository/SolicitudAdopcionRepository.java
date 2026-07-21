@@ -2,6 +2,8 @@ package com.example.backend.repository;
 
 import com.example.backend.model.SolicitudAdopcion;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -23,9 +25,11 @@ public interface SolicitudAdopcionRepository extends JpaRepository<SolicitudAdop
             Integer usuarioId,
             SolicitudAdopcion.EstadoSolicitud estadoSolicitud);
 
-    // NUEVO: Validar si ya existe una solicitud activa para evitar duplicados
+    // 🛠️ CONSULTA EXPLÍCITA: Evita errores de "bad SQL grammar" asegurando los nombres de campos de tus entidades
+    @Query("SELECT COUNT(s) > 0 FROM SolicitudAdopcion s WHERE s.usuario.id = :usuarioId AND s.mascota.id = :mascotaId AND s.estadoSolicitud = :estado")
     boolean existsByUsuarioIdAndMascotaIdAndEstadoSolicitud(
-            Integer usuarioId, 
-            Integer mascotaId, 
-            SolicitudAdopcion.EstadoSolicitud estadoSolicitud);
+            @Param("usuarioId") Integer usuarioId, 
+            @Param("mascotaId") Integer mascotaId, 
+            @Param("estado") SolicitudAdopcion.EstadoSolicitud estado
+    );
 }
